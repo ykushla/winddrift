@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {
+  createInitialState,
   getPointCoordinates,
   getPointBounds,
   setPointFromPercent,
@@ -32,7 +33,8 @@ assert.equal(clampTargetDistance(650), 650);
 assert.equal(clampTargetDistance(1200, 995), 995);
 assert.equal(clampTargetDistance(800, 995), 800);
 assert.equal(getProfileMaxRange({ trajectory: [{ range: 5 }, { range: 995 }] }), 995);
-assert.equal(getProfileMaxRange(null), Infinity);
+assert.equal(getProfileMaxRange(null), 100);
+assert.equal(createInitialState().targetDistance, 100);
 
 const points = [
   { id: 'start', locked: true, positionMode: 'percent', position: 0 },

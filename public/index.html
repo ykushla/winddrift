@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#06101d">
+  <meta id="theme-color-meta" name="theme-color" content="#06101d">
   <title>Wind Drift</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -11,14 +11,19 @@
   <main class="app-shell">
     <nav class="app-nav" aria-label="Основна навігація">
       <div class="nav-dropdown">
-        <button id="nav-menu-button" class="nav-menu-button" type="button" aria-haspopup="true" aria-expanded="false">
-          <span id="nav-current-label">Вітрова поправка</span>
-          <span class="nav-chevron" aria-hidden="true">⌄</span>
+        <button id="nav-menu-button" class="nav-menu-button" type="button" aria-label="Відкрити меню" aria-haspopup="true" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
         </button>
         <div id="nav-menu" class="nav-menu" hidden>
           <button type="button" class="nav-item active" data-page-target="calculator">Вітрова поправка</button>
           <button type="button" class="nav-item" data-page-target="about">Як працює додаток</button>
           <button type="button" class="nav-item" data-page-target="reference">Довідник</button>
+          <button id="theme-toggle" type="button" class="nav-item nav-theme-item" aria-label="Перемкнути тему">
+            <span id="theme-label">Світла тема</span>
+            <span id="theme-icon" class="theme-icon" aria-hidden="true">☀︎</span>
+          </button>
         </div>
       </div>
     </nav>
@@ -88,13 +93,12 @@
         <h2>Як згенерувати таблицю в Applied Ballistics</h2>
         <ol class="info-steps">
           <li>В Applied Ballistics вибери потрібний профіль гвинтівки та боєприпасу.</li>
-          <li>Побудуй <strong>Range Card</strong> з потрібним максимальним діапазоном. Чим далі закінчується таблиця, тим більшу дистанцію цілі дозволить Wind Drift.</li>
+          <li>Побудуй <strong>Range Card</strong> з потрібним максимальним діапазоном. Чим далі закінчується таблиця, тим більшу дистанцію цілі дозволить Wind Drift. <strong>Бажано використовувати крок 5 м.</strong></li>
           <li>Задай вітер для таблиці. Напрям може бути лівим або правим; бажано використовувати виражену поперечну складову. Додаток сам врахує швидкість і напрям із CSV.</li>
           <li>Якщо є два значення вітру, сильніше значення дає кращу точність після нормалізації через менший відносний вплив округлення.</li>
           <li><strong>Вимкни Spin Drift, Coriolis та інші горизонтальні поправки, не пов’язані безпосередньо з вітром.</strong> Інакше вони потраплять у Windage і дадуть систематичну похибку.</li>
           <li>Експортуй Range Card у CSV і імпортуй цей файл кнопкою <strong>«Імпорт CSV»</strong> на головному екрані.</li>
         </ol>
-        <div class="message warning static-warning">CSV має містити чисту вітрову поправку. Spin Drift, Coriolis та інші незалежні горизонтальні ефекти повинні бути вимкнені перед експортом.</div>
       </article>
 
       <article class="content-card">

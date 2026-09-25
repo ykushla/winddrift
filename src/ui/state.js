@@ -4,7 +4,7 @@ export const MIN_POINT_GAP_METERS = 1;
 export const createInitialState = () => ({
   profile: null,
   calibration: null,
-  targetDistance: 500,
+  targetDistance: MIN_TARGET_DISTANCE,
   interpolation: 'linear',
   windPoints: [
     { id: crypto.randomUUID(), locked: true, positionMode: 'percent', position: 0, speed: 0, clock: 3 },
@@ -28,9 +28,9 @@ export function clampTargetDistance(value, maxDistance = Infinity) {
 
 export function getProfileMaxRange(profile) {
   const rows = profile?.trajectory;
-  if (!Array.isArray(rows) || rows.length === 0) return Infinity;
+  if (!Array.isArray(rows) || rows.length === 0) return MIN_TARGET_DISTANCE;
   const maxRange = Number(rows.at(-1)?.range);
-  return Number.isFinite(maxRange) ? maxRange : Infinity;
+  return Number.isFinite(maxRange) ? Math.max(MIN_TARGET_DISTANCE, maxRange) : MIN_TARGET_DISTANCE;
 }
 
 export function getPointCoordinates(point, targetDistance) {

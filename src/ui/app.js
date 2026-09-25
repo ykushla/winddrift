@@ -41,7 +41,10 @@ const els = {
   appVersion: $('#app-version'),
   navMenuButton: $('#nav-menu-button'),
   navMenu: $('#nav-menu'),
-  navCurrentLabel: $('#nav-current-label')
+  themeToggle: $('#theme-toggle'),
+  themeLabel: $('#theme-label'),
+  themeIcon: $('#theme-icon'),
+  themeColorMeta: $('#theme-color-meta')
 };
 
 
@@ -55,6 +58,29 @@ const pageLabels = {
   about: 'Як працює додаток',
   reference: 'Довідник'
 };
+
+const THEME_STORAGE_KEY = 'wind-drift-theme';
+
+function getPreferredTheme() {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === 'light' || stored === 'dark') return stored;
+  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  const safeTheme = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = safeTheme;
+  localStorage.setItem(THEME_STORAGE_KEY, safeTheme);
+
+  const nextTheme = safeTheme === 'dark' ? 'light' : 'dark';
+  if (els.themeLabel) els.themeLabel.textContent = nextTheme === 'light' ? 'Світла тема' : 'Темна тема';
+  if (els.themeIcon) els.themeIcon.textContent = nextTheme === 'light' ? '☀︎' : '☾';
+  if (els.themeToggle) els.themeToggle.setAttribute(
+    'aria-label',
+    nextTheme === 'light' ? 'Увімкнути світлу тему' : 'Увімкнути темну тему'
+  );
+  if (els.themeColorMeta) els.themeColorMeta.content = safeTheme === 'light' ? '#f3f7fb' : '#06101d';
+}
 
 function closeNavMenu() {
   if (!els.navMenu || !els.navMenuButton) return;
@@ -78,7 +104,6 @@ function showPage(pageName) {
   document.querySelectorAll('[data-page-target]').forEach(item => {
     item.classList.toggle('active', item.dataset.pageTarget === safePage);
   });
-  if (els.navCurrentLabel) els.navCurrentLabel.textContent = pageLabels[safePage];
   closeNavMenu();
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -264,29 +289,42 @@ els.importInput.addEventListener('change', async event => {
   }
 });
 
-els.targetDistance.addEventListener('input', event => {
-  trimRedundantLeadingZeros(event.target);
-  if (event.target.value === '') return;
+function commitTargetDistanceInput(input) {
+  const rawValue = input.value.trim();
+  const requested = rawValue === '' ? NaN : Number(rawValue);
 
-  const requested = Number(event.target.value);
-  if (!Number.isFinite(requested)) return;
+  if (!Number.isFinite(requested)) {
+    input.value = formatNumber(state.targetDistance, 0);
+    return;
+  }
 
   const value = clampTargetDistance(requested, getProfileMaxRange(state.profile));
-  if (value !== requested) event.target.value = formatNumber(value, 0);
-
   state.targetDistance = value;
+  input.value = formatNumber(value, 0);
   state.windPoints = normalizeWindPointPositions(state.windPoints, state.targetDistance);
   renderWindPoints();
   recalculate();
-});
+}
 
 els.targetDistance.addEventListener('change', event => {
-  const value = clampTargetDistance(event.target.value, getProfileMaxRange(state.profile));
-  state.targetDistance = value;
-  event.target.value = formatNumber(value, 0);
-  state.windPoints = normalizeWindPointPositions(state.windPoints, state.targetDistance);
-  renderWindPoints();
-  recalculate();
+  commitTargetDistanceInput(event.target);
+});
+
+els.targetDistance.addEventListener('blur', event => {
+  commitTargetDistanceInput(event.target);
+});
+
+els.targetDistance.addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    commitTargetDistanceInput(event.target);
+    event.target.blur();
+    return;
+  }
+
+  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    requestAnimationFrame(() => commitTargetDistanceInput(event.target));
+  }
 });
 
 els.addPoint.addEventListener('click', () => {
@@ -477,6 +515,13 @@ els.navMenu?.addEventListener('click', event => {
   showPage(item.dataset.pageTarget);
 });
 
+els.themeToggle?.addEventListener('click', event => {
+  event.stopPropagation();
+  const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  applyTheme(current === 'light' ? 'dark' : 'light');
+  closeNavMenu();
+});
+
 document.addEventListener('click', event => {
   if (!event.target.closest('.nav-dropdown')) closeNavMenu();
 });
@@ -487,7 +532,9 @@ document.addEventListener('keydown', event => {
 });
 
 els.targetDistance.min = MIN_TARGET_DISTANCE;
+els.targetDistance.max = getProfileMaxRange(state.profile);
 els.targetDistance.value = state.targetDistance;
+applyTheme(getPreferredTheme());
 renderProfile();
 renderWindPoints();
 renderResult();
