@@ -4,7 +4,7 @@ import {
   validateWindProfile,
   calculateWindCorrection
 } from '../core/index.js';
-import { createInitialState, updatePointPositionMode } from './state.js';
+import { createInitialState, getPointCoordinates, setPointFromPercent, setPointFromDistance } from './state.js';
 import { windPointTemplate, formatNumber, clockLabel, clockFaceTemplate, normalizeClock } from './components.js';
 
 const state = createInitialState();
@@ -228,37 +228,61 @@ els.addPoint.addEventListener('click', () => {
   recalculate();
 });
 
-function updateDerivedPositionUi(point, card) {
-  const derived = card.querySelector('.derived-value');
-  if (point.positionMode === 'percent') {
-    const value = card.querySelector('.percent-value-number');
-    if (value) value.textContent = formatNumber(Number(point.position), 0);
-    if (derived) derived.textContent = `${formatNumber(state.targetDistance * Number(point.position) / 100, 0)} м`;
-  } else if (derived) {
-    const pct = state.targetDistance > 0 ? Number(point.position) / state.targetDistance * 100 : 0;
-    derived.textContent = `${formatNumber(pct, 0)}%`;
+function updatePositionControls(point, card) {
+  const { percent, distance } = getPointCoordinates(point, state.targetDistance);
+  const slider = card.querySelector('.position-slider');
+  const percentValue = card.querySelector('.percent-value-number');
+  const distanceInput = card.querySelector('.position-input');
+
+  if (slider) slider.value = Math.max(0, Math.min(100, percent));
+  if (percentValue) percentValue.textContent = formatNumber(percent, 0);
+  if (distanceInput && document.activeElement !== distanceInput) {
+    distanceInput.value = formatNumber(distance, 0);
   }
 }
 
 els.windPoints.addEventListener('input', event => {
   const card = event.target.closest('[data-point-id]');
   if (!card) return;
-  const point = state.windPoints.find(p => p.id === card.dataset.pointId);
-  if (!point) return;
+  const index = state.windPoints.findIndex(p => p.id === card.dataset.pointId);
+  if (index < 0) return;
+  let point = state.windPoints[index];
 
   if (event.target.matches('.position-input, .speed-input')) trimRedundantLeadingZeros(event.target);
 
   if (event.target.matches('.position-slider')) {
-    point.position = Number(event.target.value);
-    updateDerivedPositionUi(point, card);
+    point = setPointFromPercent(point, Number(event.target.value), state.targetDistance);
+    state.windPoints[index] = point;
+    const coords = getPointCoordinates(point, state.targetDistance);
+    const distanceInput = card.querySelector('.position-input');
+    const percentValue = card.querySelector('.percent-value-number');
+    if (distanceInput) distanceInput.value = formatNumber(coords.distance, 0);
+    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 0);
   }
+
   if (event.target.matches('.position-input')) {
-    point.position = Number(event.target.value);
-    updateDerivedPositionUi(point, card);
+    point = setPointFromDistance(point, Number(event.target.value), state.targetDistance);
+    state.windPoints[index] = point;
+    const coords = getPointCoordinates(point, state.targetDistance);
+    const slider = card.querySelector('.position-slider');
+    const percentValue = card.querySelector('.percent-value-number');
+    if (slider) slider.value = Math.max(0, Math.min(100, coords.percent));
+    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 0);
   }
+
   if (event.target.matches('.speed-input')) point.speed = Number(event.target.value);
 
   recalculate();
+});
+
+els.windPoints.addEventListener('change', event => {
+  if (!event.target.matches('.position-input')) return;
+  const card = event.target.closest('[data-point-id]');
+  if (!card) return;
+  const point = state.windPoints.find(p => p.id === card.dataset.pointId);
+  if (!point) return;
+  const { distance } = getPointCoordinates(point, state.targetDistance);
+  event.target.value = formatNumber(distance, 0);
 });
 
 els.windPoints.addEventListener('click', event => {
@@ -269,14 +293,6 @@ els.windPoints.addEventListener('click', event => {
 
   if (event.target.closest('.clock-button')) {
     openClock(state.windPoints[index].id);
-    return;
-  }
-
-  const modeButton = event.target.closest('button[data-mode]');
-  if (modeButton) {
-    state.windPoints[index] = updatePointPositionMode(state.windPoints[index], modeButton.dataset.mode, state.targetDistance);
-    renderWindPoints();
-    recalculate();
     return;
   }
 

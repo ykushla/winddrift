@@ -86,40 +86,29 @@ export function windPointTemplate(point, targetDistance) {
       </article>`;
   }
 
-  const isPercent = point.positionMode === 'percent';
-  const distance = targetDistance * Number(point.position) / 100;
-  const percent = targetDistance > 0 ? Number(point.position) / targetDistance * 100 : 0;
-
-  const positionControl = isPercent
-    ? `
-      <div class="position-primary-line percent-primary-line">
-        <div class="percent-value"><span class="percent-value-number">${formatNumber(Number(point.position), 0)}</span>%</div>
-        <div class="coordinate-companion">${formatNumber(distance, 0)} <span>м</span></div>
-      </div>
-      <div class="percent-control">
-        <input class="position-slider" type="range" min="0" max="100" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція у відсотках">
-        <div class="slider-scale"><span>0%</span><span>100%</span></div>
-      </div>`
-    : `
-      <div class="position-primary-line distance-primary-line">
-        <div class="position-row distance-entry-row">
-          <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція в метрах">
-          <span class="distance-unit">м</span>
-        </div>
-        <div class="coordinate-companion">${formatNumber(percent, 0)}%</div>
-      </div>`;
+  const isDistanceSource = point.positionMode === 'distance';
+  const distance = isDistanceSource
+    ? Number(point.position)
+    : targetDistance * Number(point.position) / 100;
+  const percent = isDistanceSource
+    ? (targetDistance > 0 ? Number(point.position) / targetDistance * 100 : 0)
+    : Number(point.position);
 
   return `
     <article class="wind-point" data-point-id="${point.id}">
-      <div class="point-position">
-        <div class="point-position-head">
-          <label>ПОЗИЦІЯ</label>
-          <div class="segmented compact position-mode">
-            <button type="button" data-mode="percent" class="${isPercent ? 'active' : ''}">%</button>
-            <button type="button" data-mode="distance" class="${!isPercent ? 'active' : ''}">м</button>
+      <div class="point-position dual-position-control">
+        <label>ПОЗИЦІЯ</label>
+        <div class="position-dual-head">
+          <div class="percent-readout"><span class="percent-value-number">${formatNumber(percent, 0)}</span>%</div>
+          <div class="distance-entry-row">
+            <input class="field position-input" inputmode="decimal" type="number" min="0" max="${escapeHtml(targetDistance)}" step="1" value="${escapeHtml(formatNumber(distance, 0))}" aria-label="Позиція в метрах">
+            <span class="distance-unit">м</span>
           </div>
         </div>
-        ${positionControl}
+        <div class="percent-control">
+          <input class="position-slider" type="range" min="0" max="100" step="1" value="${escapeHtml(percent)}" aria-label="Позиція у відсотках">
+          <div class="slider-scale"><span>0%</span><span>100%</span></div>
+        </div>
       </div>
 
       <div class="point-wind">
