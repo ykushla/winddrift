@@ -2,7 +2,7 @@
 
 Mobile-first wind correction calculator driven by Applied Ballistics Range Card CSV exports.
 
-## v0.4
+## v0.5
 
 This version adds the first field-oriented UI while keeping the calculation core separate.
 
@@ -86,3 +86,10 @@ index.html    GitHub Pages entry redirect
 - Profile management screen.
 - Remember last wind field and interpolation model.
 - PWA manifest and service worker for offline installation on iPhone.
+
+
+## v0.5 UI changes
+- 0.5-hour circular wind-direction dial optimized for touch
+- Wind model selector moved to the top bar
+- Blue field UI theme
+- Result unit MIL reduced to the same visual weight as L/R

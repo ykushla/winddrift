@@ -5,7 +5,7 @@ import {
   calculateWindCorrection
 } from '../core/index.js';
 import { createInitialState, updatePointPositionMode } from './state.js';
-import { windPointTemplate, formatNumber, escapeHtml } from './components.js';
+import { windPointTemplate, formatNumber, clockLabel, clockFaceTemplate } from './components.js';
 
 const state = createInitialState();
 const $ = selector => document.querySelector(selector);
@@ -21,10 +21,15 @@ const els = {
   windPoints: $('#wind-points'),
   addPoint: $('#add-point'),
   resultSide: $('#result-side'),
-  resultValue: $('#result-value'),
+  resultNumber: $('#result-number'),
   effectiveWind: $('#effective-wind'),
-  resultDetails: $('#result-details')
+  resultDetails: $('#result-details'),
+  clockDialog: $('#clock-dialog'),
+  clockFace: $('#clock-face'),
+  clockTitle: $('#clock-title')
 };
+
+let editingClockPointId = null;
 
 function setImportMessage(message, type = 'info') {
   els.importMessage.className = `message ${type}`;
@@ -56,7 +61,7 @@ function renderWindPoints() {
 function renderResult() {
   if (!state.profile) {
     els.resultSide.textContent = '—';
-    els.resultValue.textContent = '—';
+    els.resultNumber.textContent = '—';
     els.effectiveWind.textContent = 'Import a profile to calculate';
     els.resultDetails.textContent = '';
     return;
@@ -64,7 +69,7 @@ function renderResult() {
 
   if (state.error || !state.result) {
     els.resultSide.textContent = '!';
-    els.resultValue.textContent = '—';
+    els.resultNumber.textContent = '—';
     els.effectiveWind.textContent = state.error || 'Unable to calculate';
     els.resultDetails.textContent = '';
     return;
@@ -72,7 +77,7 @@ function renderResult() {
 
   const r = state.result;
   els.resultSide.textContent = r.side === 'NONE' ? '—' : r.side;
-  els.resultValue.textContent = `${formatNumber(Math.abs(r.correctionMrad), 2)} MIL`;
+  els.resultNumber.textContent = formatNumber(Math.abs(r.correctionMrad), 2);
   els.effectiveWind.textContent = `Effective crosswind ${formatNumber(r.effectiveWind, 2)} m/s`;
   els.resultDetails.textContent = `Sensitivity ${formatNumber(r.sensitivity, 4)} mrad/(m/s)`;
 }
@@ -99,6 +104,31 @@ function recalculate() {
   }
 
   renderResult();
+}
+
+function openClock(pointId) {
+  const point = state.windPoints.find(p => p.id === pointId);
+  if (!point) return;
+  editingClockPointId = pointId;
+  els.clockTitle.textContent = clockLabel(point.clock);
+  els.clockFace.innerHTML = clockFaceTemplate(point.clock);
+  els.clockDialog.hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeClock() {
+  editingClockPointId = null;
+  els.clockDialog.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+function chooseClock(clock) {
+  const point = state.windPoints.find(p => p.id === editingClockPointId);
+  if (!point) return;
+  point.clock = Number(clock);
+  renderWindPoints();
+  recalculate();
+  closeClock();
 }
 
 async function importCsv(file) {
@@ -179,16 +209,6 @@ els.windPoints.addEventListener('input', event => {
 
   if (event.target.matches('.position-input')) point.position = Number(event.target.value);
   if (event.target.matches('.speed-input')) point.speed = Number(event.target.value);
-  if (event.target.matches('.clock-input')) point.clock = Number(event.target.value);
-  recalculate();
-});
-
-els.windPoints.addEventListener('change', event => {
-  if (!event.target.matches('.clock-input')) return;
-  const card = event.target.closest('[data-point-id]');
-  const point = state.windPoints.find(p => p.id === card?.dataset.pointId);
-  if (!point) return;
-  point.clock = Number(event.target.value);
   recalculate();
 });
 
@@ -197,6 +217,11 @@ els.windPoints.addEventListener('click', event => {
   if (!card) return;
   const index = state.windPoints.findIndex(p => p.id === card.dataset.pointId);
   if (index < 0) return;
+
+  if (event.target.closest('.clock-button')) {
+    openClock(state.windPoints[index].id);
+    return;
+  }
 
   const modeButton = event.target.closest('button[data-mode]');
   if (modeButton) {
@@ -211,6 +236,20 @@ els.windPoints.addEventListener('click', event => {
     renderWindPoints();
     recalculate();
   }
+});
+
+els.clockFace.addEventListener('click', event => {
+  const mark = event.target.closest('[data-clock-value]');
+  if (!mark) return;
+  chooseClock(mark.dataset.clockValue);
+});
+
+els.clockDialog.addEventListener('click', event => {
+  if (event.target.closest('[data-clock-close]')) closeClock();
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !els.clockDialog.hidden) closeClock();
 });
 
 els.targetDistance.value = state.targetDistance;

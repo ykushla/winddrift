@@ -12,10 +12,47 @@ export function formatNumber(value, digits = 2) {
   return value.toFixed(digits).replace(/\.00$/, '');
 }
 
+export function normalizeClock(clock) {
+  let value = Number(clock);
+  if (!Number.isFinite(value)) value = 12;
+  value = ((value % 12) + 12) % 12;
+  if (Math.abs(value) < 1e-9) value = 12;
+  return Math.round(value * 2) / 2;
+}
+
 export function clockLabel(clock) {
-  if (!Number.isFinite(clock)) return '—';
-  const normalized = ((clock - 1) % 12 + 12) % 12 + 1;
-  return `${formatNumber(normalized, normalized % 1 ? 1 : 0)}h`;
+  const normalized = normalizeClock(clock);
+  const hour = Math.floor(normalized);
+  const minutes = normalized % 1 ? '30' : '00';
+  return `${hour}:${minutes}`;
+}
+
+export function clockFaceTemplate(selectedClock) {
+  const selected = normalizeClock(selectedClock);
+  const values = Array.from({ length: 24 }, (_, i) => {
+    const raw = i * 0.5;
+    return raw === 0 ? 12 : raw;
+  });
+
+  return `
+    <div class="clock-ring" aria-hidden="true"></div>
+    <div class="clock-axis vertical" aria-hidden="true"></div>
+    <div class="clock-axis horizontal" aria-hidden="true"></div>
+    <div class="clock-center" aria-hidden="true"></div>
+    ${values.map(clock => {
+      const angle = (clock % 12) * 30;
+      const isSelected = Math.abs(normalizeClock(clock) - selected) < 1e-9;
+      return `
+        <button type="button"
+          class="clock-mark ${isSelected ? 'selected' : ''}"
+          data-clock-value="${clock}"
+          style="--clock-angle:${angle}deg"
+          aria-label="${clockLabel(clock)}"
+          aria-pressed="${isSelected}">
+          <span>${clockLabel(clock).replace(':00', '').replace(':30', '½')}</span>
+        </button>`;
+    }).join('')}
+  `;
 }
 
 export function windPointTemplate(point, targetDistance) {
@@ -45,9 +82,10 @@ export function windPointTemplate(point, targetDistance) {
             <input class="field speed-input" inputmode="decimal" type="number" min="0" step="0.1" value="${escapeHtml(point.speed)}">
             <span>m/s</span>
           </div>
-          <select class="field clock-input" aria-label="Wind direction">
-            ${Array.from({ length: 12 }, (_, i) => i + 1).map(h => `<option value="${h}" ${Number(point.clock) === h ? 'selected' : ''}>${h}:00</option>`).join('')}
-          </select>
+          <button type="button" class="field clock-button" aria-label="Wind direction ${clockLabel(point.clock)}">
+            <span class="clock-button-arrow">◷</span>
+            <span>${clockLabel(point.clock)}</span>
+          </button>
         </div>
       </div>
 
