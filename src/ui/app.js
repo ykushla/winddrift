@@ -5,7 +5,17 @@ import {
   validateWindProfile,
   calculateWindCorrection
 } from '../core/index.js';
-import { createInitialState, getPointCoordinates, setPointFromPercent, setPointFromDistance } from './state.js';
+import {
+  createInitialState,
+  getPointCoordinates,
+  getPointBounds,
+  setPointFromPercent,
+  setPointFromDistance,
+  normalizeWindPointPositions,
+  findLargestGapMidpoint,
+  clampTargetDistance,
+  MIN_TARGET_DISTANCE
+} from './state.js';
 import { windPointTemplate, formatNumber, clockLabel, clockFaceTemplate, normalizeClock } from './components.js';
 
 const state = createInitialState();
@@ -69,7 +79,11 @@ function renderProfile() {
 
 function renderWindPoints() {
   els.windPoints.innerHTML = state.windPoints
-    .map(p => windPointTemplate(p, state.targetDistance))
+    .map((p, index) => windPointTemplate(
+      p,
+      state.targetDistance,
+      p.locked ? null : getPointBounds(state.windPoints, index, state.targetDistance)
+    ))
     .join('');
 }
 
@@ -215,37 +229,75 @@ els.importInput.addEventListener('change', async event => {
 
 els.targetDistance.addEventListener('input', event => {
   trimRedundantLeadingZeros(event.target);
-  const value = Number(event.target.value);
-  if (!(value > 0)) return;
+  if (event.target.value === '') return;
+
+  const requested = Number(event.target.value);
+  if (!Number.isFinite(requested)) return;
+
+  const value = clampTargetDistance(requested);
+  if (value !== requested) event.target.value = formatNumber(value, 0);
+
   state.targetDistance = value;
+  state.windPoints = normalizeWindPointPositions(state.windPoints, state.targetDistance);
+  renderWindPoints();
+  recalculate();
+});
+
+els.targetDistance.addEventListener('change', event => {
+  const value = clampTargetDistance(event.target.value);
+  state.targetDistance = value;
+  event.target.value = formatNumber(value, 0);
+  state.windPoints = normalizeWindPointPositions(state.windPoints, state.targetDistance);
   renderWindPoints();
   recalculate();
 });
 
 els.addPoint.addEventListener('click', () => {
-  state.windPoints.splice(state.windPoints.length - 1, 0, {
+  const candidate = findLargestGapMidpoint(state.windPoints, state.targetDistance);
+  if (!candidate || candidate.distance < 1 || candidate.distance > state.targetDistance - 1) return;
+
+  state.windPoints.splice(candidate.index, 0, {
     id: crypto.randomUUID(),
     locked: false,
-    positionMode: 'percent',
-    position: 50,
+    positionMode: 'distance',
+    position: Math.round(candidate.distance),
     speed: 0,
     clock: 3
   });
+  state.windPoints = normalizeWindPointPositions(state.windPoints, state.targetDistance);
   renderWindPoints();
   recalculate();
 });
 
-function updatePositionControls(point, card) {
+function updatePositionControls(point, card, index) {
   const { percent, distance } = getPointCoordinates(point, state.targetDistance);
+  const bounds = getPointBounds(state.windPoints, index, state.targetDistance);
   const slider = card.querySelector('.position-slider');
   const percentValue = card.querySelector('.percent-value-number');
   const distanceInput = card.querySelector('.position-input');
+  const scaleLabels = card.querySelectorAll('.slider-scale span');
 
-  if (slider) slider.value = Math.max(0, Math.min(100, percent));
-  if (percentValue) percentValue.textContent = formatNumber(percent, 0);
-  if (distanceInput && document.activeElement !== distanceInput) {
-    distanceInput.value = formatNumber(distance, 0);
+  if (slider) {
+    slider.min = bounds.minPercent;
+    slider.max = bounds.maxPercent;
+    slider.value = Math.max(bounds.minPercent, Math.min(bounds.maxPercent, percent));
   }
+  if (percentValue) percentValue.textContent = formatNumber(percent, 1);
+  if (distanceInput) {
+    distanceInput.min = Math.ceil(bounds.minDistance);
+    distanceInput.max = Math.floor(bounds.maxDistance);
+    if (document.activeElement !== distanceInput) distanceInput.value = formatNumber(distance, 0);
+  }
+  if (scaleLabels[0]) scaleLabels[0].textContent = `${formatNumber(bounds.minPercent, 1)}%`;
+  if (scaleLabels[1]) scaleLabels[1].textContent = `${formatNumber(bounds.maxPercent, 1)}%`;
+}
+
+function refreshPositionConstraints() {
+  els.windPoints.querySelectorAll('[data-point-id]').forEach(card => {
+    const index = state.windPoints.findIndex(p => p.id === card.dataset.pointId);
+    if (index <= 0 || index >= state.windPoints.length - 1) return;
+    updatePositionControls(state.windPoints[index], card, index);
+  });
 }
 
 els.windPoints.addEventListener('input', event => {
@@ -258,23 +310,28 @@ els.windPoints.addEventListener('input', event => {
   if (event.target.matches('.position-input, .speed-input')) trimRedundantLeadingZeros(event.target);
 
   if (event.target.matches('.position-slider')) {
-    point = setPointFromPercent(point, Number(event.target.value), state.targetDistance);
+    const bounds = getPointBounds(state.windPoints, index, state.targetDistance);
+    point = setPointFromPercent(point, Number(event.target.value), state.targetDistance, bounds);
     state.windPoints[index] = point;
     const coords = getPointCoordinates(point, state.targetDistance);
     const distanceInput = card.querySelector('.position-input');
     const percentValue = card.querySelector('.percent-value-number');
     if (distanceInput) distanceInput.value = formatNumber(coords.distance, 0);
-    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 0);
+    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 1);
+    refreshPositionConstraints();
   }
 
   if (event.target.matches('.position-input')) {
-    point = setPointFromDistance(point, Number(event.target.value), state.targetDistance);
+    const bounds = getPointBounds(state.windPoints, index, state.targetDistance);
+    point = setPointFromDistance(point, Number(event.target.value), state.targetDistance, bounds);
     state.windPoints[index] = point;
     const coords = getPointCoordinates(point, state.targetDistance);
+    event.target.value = formatNumber(coords.distance, 0);
     const slider = card.querySelector('.position-slider');
     const percentValue = card.querySelector('.percent-value-number');
-    if (slider) slider.value = Math.max(0, Math.min(100, coords.percent));
-    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 0);
+    if (slider) slider.value = coords.percent;
+    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 1);
+    refreshPositionConstraints();
   }
 
   if (event.target.matches('.speed-input')) point.speed = Number(event.target.value);
@@ -344,6 +401,7 @@ document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && !els.clockDialog.hidden) closeClock();
 });
 
+els.targetDistance.min = MIN_TARGET_DISTANCE;
 els.targetDistance.value = state.targetDistance;
 renderProfile();
 renderWindPoints();
