@@ -352,3 +352,57 @@ h1 { margin: 4px 0 0; font-size: clamp(22px, 6vw, 30px); line-height: 1.05; over
   .percent-value { font-size: 30px; }
   .position-input { width: 108px; flex-basis: 108px; }
 }
+
+
+/* v0.8 */
+.position-value-line,
+.distance-control-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.position-value-line {
+  justify-content: center;
+  margin-bottom: 9px;
+}
+.position-value-line .percent-value {
+  margin: 0;
+}
+.derived-position {
+  margin-top: 0;
+}
+.derived-value {
+  display: inline-block;
+  color: #b9cee0;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+.distance-control-line .derived-position {
+  flex: 0 0 auto;
+}
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 2px max(4px, env(safe-area-inset-bottom));
+  color: var(--muted);
+  font-size: 12px;
+}
+.app-footer a {
+  color: #8fc7ff;
+  text-decoration: none;
+  font-weight: 700;
+}
+.app-footer a:active {
+  color: var(--text);
+}
+@media (max-width: 420px) {
+  .derived-value { font-size: 17px; }
+  .distance-control-line { gap: 9px; }
+  .distance-entry-row { max-width: 132px; }
+  .app-footer { font-size: 11px; }
+}
