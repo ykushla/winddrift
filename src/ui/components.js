@@ -56,39 +56,68 @@ export function clockFaceTemplate(selectedClock) {
 }
 
 export function windPointTemplate(point, targetDistance) {
+  if (point.locked) {
+    const isShooter = Number(point.position) === 0;
+    const absoluteDistance = isShooter ? 0 : targetDistance;
+    const caption = isShooter ? 'Дистанція стрільця' : 'Дистанція цілі';
+
+    return `
+      <article class="wind-point locked-point" data-point-id="${point.id}">
+        <div class="point-position static-position">
+          <label>ПОЗИЦІЯ</label>
+          <div class="static-distance">${formatNumber(absoluteDistance, 0)} <span>м</span></div>
+          <div class="position-caption">${caption}</div>
+        </div>
+
+        <div class="point-wind">
+          <label>ВІТЕР</label>
+          <div class="wind-row">
+            <div class="speed-wrap">
+              <input class="field speed-input" inputmode="decimal" type="number" min="0" step="0.1" value="${escapeHtml(point.speed)}">
+              <span>м/с</span>
+            </div>
+            <button type="button" class="field clock-button" aria-label="Напрямок вітру ${clockLabel(point.clock)}">
+              <span class="clock-button-arrow">◷</span>
+              <span>${clockLabel(point.clock)}</span>
+            </button>
+          </div>
+        </div>
+      </article>`;
+  }
+
   const isPercent = point.positionMode === 'percent';
   const derived = isPercent
-    ? `${formatNumber(targetDistance * Number(point.position) / 100, 0)} m`
+    ? `${formatNumber(targetDistance * Number(point.position) / 100, 0)} м`
     : `${formatNumber(targetDistance > 0 ? Number(point.position) / targetDistance * 100 : 0, 0)}%`;
 
   return `
     <article class="wind-point" data-point-id="${point.id}">
       <div class="point-position">
-        <label>Position</label>
+        <label>ПОЗИЦІЯ</label>
         <div class="position-row">
-          <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}" ${point.locked ? 'disabled' : ''}>
-          <div class="segmented compact position-mode ${point.locked ? 'disabled' : ''}">
-            <button type="button" data-mode="percent" class="${isPercent ? 'active' : ''}" ${point.locked ? 'disabled' : ''}>%</button>
-            <button type="button" data-mode="distance" class="${!isPercent ? 'active' : ''}" ${point.locked ? 'disabled' : ''}>m</button>
+          <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}">
+          <div class="segmented compact position-mode">
+            <button type="button" data-mode="percent" class="${isPercent ? 'active' : ''}">%</button>
+            <button type="button" data-mode="distance" class="${!isPercent ? 'active' : ''}">м</button>
           </div>
         </div>
         <div class="derived-position">${derived}</div>
       </div>
 
       <div class="point-wind">
-        <label>Wind</label>
+        <label>ВІТЕР</label>
         <div class="wind-row">
           <div class="speed-wrap">
             <input class="field speed-input" inputmode="decimal" type="number" min="0" step="0.1" value="${escapeHtml(point.speed)}">
-            <span>m/s</span>
+            <span>м/с</span>
           </div>
-          <button type="button" class="field clock-button" aria-label="Wind direction ${clockLabel(point.clock)}">
+          <button type="button" class="field clock-button" aria-label="Напрямок вітру ${clockLabel(point.clock)}">
             <span class="clock-button-arrow">◷</span>
             <span>${clockLabel(point.clock)}</span>
           </button>
         </div>
       </div>
 
-      ${point.locked ? '<div class="point-lock">fixed</div>' : '<button type="button" class="remove-point" aria-label="Remove wind point">×</button>'}
+      <button type="button" class="remove-point" aria-label="Видалити точку вітру">×</button>
     </article>`;
 }

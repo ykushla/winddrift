@@ -115,3 +115,43 @@ h1 { margin: 4px 0 0; font-size: clamp(22px, 6vw, 30px); line-height: 1.05; over
   .model-selector { width: 100%; grid-template-columns: 1fr 1fr; }
   .top-controls .button { width: 100%; }
 }
+
+/* v0.6 field ergonomics */
+.position-row { align-items: stretch; }
+.position-row .position-input { flex: 1 1 92px; width: 92px; max-width: 118px; }
+.position-row .position-mode { flex: 0 0 auto; }
+.segmented.compact button { min-width: 42px; padding: 0 8px; }
+
+.locked-point { align-items: center; }
+.static-position { min-width: 0; }
+.static-distance { font-size: 28px; font-weight: 900; line-height: 1; }
+.static-distance span { font-size: 15px; color: var(--muted); font-weight: 800; }
+.position-caption { margin-top: 7px; color: var(--muted); font-size: 12px; }
+
+.add-point {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 10px auto 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--accent);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
+}
+.add-point:active { background: var(--accent-soft); }
+
+.clock-face {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.clock-mark { pointer-events: none; }
+
+@media (max-width: 540px) {
+  .position-row .position-input { width: 86px; max-width: 104px; }
+  .segmented.compact button { min-width: 40px; }
+}
