@@ -307,7 +307,7 @@ els.windPoints.addEventListener('input', event => {
   if (index < 0) return;
   let point = state.windPoints[index];
 
-  if (event.target.matches('.position-input, .speed-input')) trimRedundantLeadingZeros(event.target);
+  if (event.target.matches('.speed-input')) trimRedundantLeadingZeros(event.target);
 
   if (event.target.matches('.position-slider')) {
     const bounds = getPointBounds(state.windPoints, index, state.targetDistance);
@@ -321,32 +321,63 @@ els.windPoints.addEventListener('input', event => {
     refreshPositionConstraints();
   }
 
-  if (event.target.matches('.position-input')) {
-    const bounds = getPointBounds(state.windPoints, index, state.targetDistance);
-    point = setPointFromDistance(point, Number(event.target.value), state.targetDistance, bounds);
-    state.windPoints[index] = point;
-    const coords = getPointCoordinates(point, state.targetDistance);
-    event.target.value = formatNumber(coords.distance, 0);
-    const slider = card.querySelector('.position-slider');
-    const percentValue = card.querySelector('.percent-value-number');
-    if (slider) slider.value = coords.percent;
-    if (percentValue) percentValue.textContent = formatNumber(coords.percent, 1);
-    refreshPositionConstraints();
-  }
-
   if (event.target.matches('.speed-input')) point.speed = Number(event.target.value);
 
   recalculate();
 });
 
+function commitDistanceInput(input) {
+  const card = input.closest('[data-point-id]');
+  if (!card) return;
+  const index = state.windPoints.findIndex(p => p.id === card.dataset.pointId);
+  if (index <= 0 || index >= state.windPoints.length - 1) return;
+
+  const currentPoint = state.windPoints[index];
+  const rawValue = input.value.trim();
+  const requested = rawValue === '' ? NaN : Number(rawValue);
+
+  // Empty/invalid drafts are allowed while editing, but on commit we restore
+  // the last valid position instead of forcing a transient value into state.
+  if (!Number.isFinite(requested)) {
+    const { distance } = getPointCoordinates(currentPoint, state.targetDistance);
+    input.value = formatNumber(distance, 0);
+    return;
+  }
+
+  const bounds = getPointBounds(state.windPoints, index, state.targetDistance);
+  const updatedPoint = setPointFromDistance(currentPoint, requested, state.targetDistance, bounds);
+  state.windPoints[index] = updatedPoint;
+
+  const coords = getPointCoordinates(updatedPoint, state.targetDistance);
+  input.value = formatNumber(coords.distance, 0);
+  const slider = card.querySelector('.position-slider');
+  const percentValue = card.querySelector('.percent-value-number');
+  if (slider) slider.value = coords.percent;
+  if (percentValue) percentValue.textContent = formatNumber(coords.percent, 1);
+
+  refreshPositionConstraints();
+  recalculate();
+}
+
 els.windPoints.addEventListener('change', event => {
   if (!event.target.matches('.position-input')) return;
-  const card = event.target.closest('[data-point-id]');
-  if (!card) return;
-  const point = state.windPoints.find(p => p.id === card.dataset.pointId);
-  if (!point) return;
-  const { distance } = getPointCoordinates(point, state.targetDistance);
-  event.target.value = formatNumber(distance, 0);
+  commitDistanceInput(event.target);
+});
+
+els.windPoints.addEventListener('keydown', event => {
+  if (!event.target.matches('.position-input')) return;
+
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    commitDistanceInput(event.target);
+    event.target.blur();
+    return;
+  }
+
+  // Preserve immediate behavior of the native numeric stepper / keyboard arrows.
+  if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    requestAnimationFrame(() => commitDistanceInput(event.target));
+  }
 });
 
 els.windPoints.addEventListener('click', event => {
