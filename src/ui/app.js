@@ -44,7 +44,9 @@ const els = {
   themeToggle: $('#theme-toggle'),
   themeLabel: $('#theme-label'),
   themeIcon: $('#theme-icon'),
-  themeColorMeta: $('#theme-color-meta')
+  themeColorMeta: $('#theme-color-meta'),
+  referenceHome: $('#reference-home'),
+  referenceMirage: $('#reference-mirage')
 };
 
 
@@ -105,6 +107,13 @@ function showPage(pageName) {
     item.classList.toggle('active', item.dataset.pageTarget === safePage);
   });
   closeNavMenu();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function showReferenceView(viewName) {
+  const showMirage = viewName === 'mirage';
+  if (els.referenceHome) els.referenceHome.hidden = showMirage;
+  if (els.referenceMirage) els.referenceMirage.hidden = !showMirage;
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -512,7 +521,22 @@ els.navMenuButton?.addEventListener('click', event => {
 els.navMenu?.addEventListener('click', event => {
   const item = event.target.closest('[data-page-target]');
   if (!item) return;
-  showPage(item.dataset.pageTarget);
+  const pageName = item.dataset.pageTarget;
+  showPage(pageName);
+  if (pageName === 'reference') showReferenceView('home');
+});
+
+document.addEventListener('click', event => {
+  const target = event.target.closest('[data-reference-target]');
+  if (target) {
+    showPage('reference');
+    showReferenceView(target.dataset.referenceTarget);
+    return;
+  }
+
+  if (event.target.closest('[data-reference-back]')) {
+    showReferenceView('home');
+  }
 });
 
 els.themeToggle?.addEventListener('click', event => {

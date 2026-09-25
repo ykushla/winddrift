@@ -113,11 +113,156 @@
     </section>
 
     <section class="app-page info-page" data-page="reference" hidden>
-      <article class="content-card placeholder-card">
-        <div class="eyebrow">ДОВІДНИК</div>
-        <h2>Розділ у розробці</h2>
-        <p>Тут буде окремий довідник по роботі з вітром, моделлю McCoy/Litz, напрямками, умовними позначеннями та практичними прикладами.</p>
-      </article>
+      <div id="reference-home" class="reference-view">
+        <article class="content-card">
+          <div class="eyebrow">ДОВІДНИК</div>
+          <h2>Польовий довідник</h2>
+          <p>Короткі практичні матеріали для оцінки вітру та роботи з поправками.</p>
+
+          <button type="button" class="reference-card" data-reference-target="mirage">
+            <div class="reference-card-icon" aria-hidden="true">≋</div>
+            <div class="reference-card-copy">
+              <strong>Читання вітру по міражу</strong>
+              <span>Швидкість, напрям і щільність міражу</span>
+            </div>
+            <span class="reference-card-chevron" aria-hidden="true">›</span>
+          </button>
+        </article>
+      </div>
+
+      <div id="reference-mirage" class="reference-view" hidden>
+        <article class="content-card mirage-article">
+          <button type="button" class="reference-back" data-reference-back>
+            <span aria-hidden="true">‹</span>
+            <span>Довідник</span>
+          </button>
+
+          <div class="eyebrow">ЧИТАННЯ ВІТРУ</div>
+          <h2>Читання вітру по міражу</h2>
+          <p class="lead">Міраж допомагає приблизно оцінити боковий вітер. Чим сильніша поперечна складова, тим більше теплові хвилі «лягають» у горизонталь.</p>
+          <div class="mirage-note">Орієнтир нижче найкраще працює для вітру приблизно з <strong>3 або 9 години</strong>.</div>
+
+          <h3>Класифікація міражу</h3>
+          <div class="mirage-grid">
+            <section class="mirage-card">
+              <div class="mirage-visual" aria-hidden="true">
+                <svg viewBox="0 0 160 120">
+                  <rect width="160" height="120" rx="18" class="mirage-sky"/>
+                  <path d="M0 82 C28 68 47 74 73 69 C101 64 126 75 160 63 V120 H0Z" class="mirage-ground"/>
+                  <g class="mirage-lines">
+                    <path d="M28 102 C22 88 34 76 28 62 C22 47 34 35 28 18"/>
+                    <path d="M54 104 C48 89 60 76 54 61 C48 47 60 34 54 19"/>
+                    <path d="M80 104 C74 89 86 76 80 61 C74 47 86 34 80 19"/>
+                    <path d="M106 104 C100 89 112 76 106 61 C100 47 112 34 106 19"/>
+                    <path d="M132 102 C126 88 138 76 132 62 C126 47 138 35 132 18"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="mirage-card-title">Кипіння</div>
+              <div class="mirage-speed">≈ 0 м/с</div>
+              <p>Хвилі майже вертикальні. Поперечна складова вітру практично відсутня.</p>
+            </section>
+
+            <section class="mirage-card">
+              <div class="mirage-visual" aria-hidden="true">
+                <svg viewBox="0 0 160 120">
+                  <rect width="160" height="120" rx="18" class="mirage-sky"/>
+                  <path d="M0 82 C28 68 47 74 73 69 C101 64 126 75 160 63 V120 H0Z" class="mirage-ground"/>
+                  <g class="mirage-lines">
+                    <path d="M22 104 C35 91 28 79 42 65 C55 52 48 39 62 22"/>
+                    <path d="M45 106 C58 93 51 80 65 66 C78 53 71 40 85 23"/>
+                    <path d="M68 106 C81 93 74 80 88 66 C101 53 94 40 108 23"/>
+                    <path d="M91 106 C104 93 97 80 111 66 C124 53 117 40 131 23"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="mirage-card-title">Повільний</div>
+              <div class="mirage-speed">0.5–1.3 м/с</div>
+              <p>Помітний нахил хвиль. Легкий поперечний вітер.</p>
+            </section>
+
+            <section class="mirage-card">
+              <div class="mirage-visual" aria-hidden="true">
+                <svg viewBox="0 0 160 120">
+                  <rect width="160" height="120" rx="18" class="mirage-sky"/>
+                  <path d="M0 82 C28 68 47 74 73 69 C101 64 126 75 160 63 V120 H0Z" class="mirage-ground"/>
+                  <g class="mirage-lines">
+                    <path d="M14 91 C38 78 52 84 75 69 C97 55 117 61 146 42"/>
+                    <path d="M13 102 C37 89 51 95 74 80 C96 66 116 72 145 53"/>
+                    <path d="M12 80 C36 67 50 73 73 58 C95 44 115 50 144 31"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="mirage-card-title">Середній</div>
+              <div class="mirage-speed">1.8–3.1 м/с</div>
+              <p>Хвилі значно пологіші. Помірний поперечний вітер.</p>
+            </section>
+
+            <section class="mirage-card">
+              <div class="mirage-visual" aria-hidden="true">
+                <svg viewBox="0 0 160 120">
+                  <rect width="160" height="120" rx="18" class="mirage-sky"/>
+                  <path d="M0 82 C28 68 47 74 73 69 C101 64 126 75 160 63 V120 H0Z" class="mirage-ground"/>
+                  <g class="mirage-lines">
+                    <path d="M11 50 C34 44 48 56 70 50 C92 44 108 56 149 47"/>
+                    <path d="M10 68 C33 62 47 74 69 68 C91 62 107 74 148 65"/>
+                    <path d="M10 86 C33 80 47 92 69 86 C91 80 107 92 148 83"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="mirage-card-title">Швидкий</div>
+              <div class="mirage-speed">3.6–5.4 м/с</div>
+              <p>Хвилі майже горизонтальні. Сильніший поперечний вітер.</p>
+            </section>
+          </div>
+
+          <h3>Що саме спостерігати</h3>
+          <div class="mirage-observe-grid">
+            <div class="mirage-observe">
+              <div class="mirage-observe-icon" aria-hidden="true">╱╱</div>
+              <strong>Кут хвиль</strong>
+              <span>Показує приблизну величину поперечної складової вітру.</span>
+            </div>
+            <div class="mirage-observe">
+              <div class="mirage-observe-icon" aria-hidden="true">→</div>
+              <strong>Напрям руху</strong>
+              <span>Показує, з якого боку дме вітер.</span>
+            </div>
+            <div class="mirage-observe">
+              <div class="mirage-observe-icon" aria-hidden="true">≋</div>
+              <strong>Щільність міражу</strong>
+              <span>Показує, наскільки добре міраж читається, а не окрему швидкість вітру.</span>
+            </div>
+          </div>
+
+          <h3>Щільність / видимість міражу</h3>
+          <div class="mirage-density-grid">
+            <div class="density-card strong">
+              <div class="density-icon" aria-hidden="true">≋</div>
+              <strong>Сильний</strong>
+              <span>Міраж виразний, хвилі легко читаються.</span>
+            </div>
+            <div class="density-card medium">
+              <div class="density-icon" aria-hidden="true">≋</div>
+              <strong>Середній</strong>
+              <span>Міраж помітний, але менш контрастний.</span>
+            </div>
+            <div class="density-card light">
+              <div class="density-icon" aria-hidden="true">≋</div>
+              <strong>Слабкий</strong>
+              <span>Міраж ледве видно; оцінка вітру грубіша.</span>
+            </div>
+          </div>
+
+          <div class="mirage-warning">
+            <div class="mirage-warning-icon" aria-hidden="true">!</div>
+            <div>
+              <strong>Важливо</strong>
+              <p>Міраж дає оцінку діапазону, а не точне числове значення. Звіряй його з рослинністю, пилом, прапорцями, іншими індикаторами та фактичними попаданнями.</p>
+            </div>
+          </div>
+        </article>
+      </div>
     </section>
 
     <footer class="app-footer">
