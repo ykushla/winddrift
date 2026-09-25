@@ -663,3 +663,55 @@ html[data-theme="light"] .position-slider::-webkit-slider-thumb,
 html[data-theme="light"] .position-slider::-moz-range-thumb {
   border-color: #ffffff;
 }
+
+
+/* v0.13.1 — brand and menu share the top row */
+.app-nav {
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.app-brand-icon {
+  color: var(--accent);
+  font-size: 31px;
+  line-height: .9;
+  font-weight: 800;
+  transform: translateY(-1px);
+}
+
+.app-brand-title {
+  font-size: clamp(21px, 5.8vw, 28px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .035em;
+  white-space: nowrap;
+}
+
+.nav-dropdown {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 390px) {
+  .app-brand {
+    gap: 8px;
+  }
+
+  .app-brand-icon {
+    font-size: 28px;
+  }
+
+  .app-brand-title {
+    font-size: 21px;
+  }
+}
