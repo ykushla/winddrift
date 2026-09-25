@@ -64,18 +64,34 @@ export function parseAppliedBallisticsCsv(text) {
   const idx = Object.fromEntries(headers.map((h, i) => [h, i]));
   const trajectory = [];
 
+  const highestRequiredIndex = Math.max(...required.map(h => idx[h]));
+
   for (let i = headerIndex + 1; i < lines.length; i++) {
     const c = lines[i].split(',');
+    const sourceRow = i + 1;
+
+    if (c.length <= highestRequiredIndex) {
+      throw new Error(`Рядок ${sourceRow} CSV має неповну структуру.`);
+    }
+
     const range = Number(c[idx['Range [M]']]);
-    if (!Number.isFinite(range)) continue;
+    if (!Number.isFinite(range) || range <= 0) {
+      throw new Error(`Некоректна дистанція в рядку ${sourceRow} CSV.`);
+    }
 
     const velocity = Number(c[idx['Velocity [M/S]']]);
     const tofCsv = Number(c[idx['ToF [SEC]']]);
     const windage1Signed = parseDirectional(c[idx['Windage [MRAD]']], 'R', 'L');
     const windage2Signed = parseDirectional(c[idx['Windage 2 [MRAD]']], 'R', 'L');
 
-    if (![velocity, tofCsv, windage1Signed, windage2Signed].every(Number.isFinite)) {
-      throw new Error(`Некоректні числові дані траєкторії на дистанції ${range} м.`);
+    if (!Number.isFinite(velocity) || velocity <= 0) {
+      throw new Error(`Некоректна швидкість кулі на дистанції ${range} м.`);
+    }
+    if (!Number.isFinite(tofCsv) || tofCsv < 0) {
+      throw new Error(`Некоректний ToF на дистанції ${range} м.`);
+    }
+    if (![windage1Signed, windage2Signed].every(Number.isFinite)) {
+      throw new Error(`Некоректні дані Windage на дистанції ${range} м.`);
     }
 
     trajectory.push({
@@ -155,6 +171,11 @@ export function validateWindProfile(profile) {
     'Під час створення Range Card в Applied Ballistics вимкни Spin Drift, Coriolis та інші горизонтальні поправки, не пов’язані з вітром.'
   ];
 
+  const m = profile?.metadata || {};
+  if (!Number.isFinite(m.muzzleVelocity) || m.muzzleVelocity <= 0) {
+    errors.push('У Range Card відсутнє або некоректне значення MV [M/S].');
+  }
+
   try {
     chooseWindCalibration(profile);
   } catch (e) {
@@ -162,10 +183,51 @@ export function validateWindProfile(profile) {
   }
 
   const rows = profile?.trajectory || [];
-  for (let i = 1; i < rows.length; i++) {
-    if (rows[i].range <= rows[i - 1].range) errors.push('Дистанції в таблиці мають зростати без повторів.');
+  if (rows.length < 2) {
+    errors.push('У таблиці замало рядків траєкторії.');
+    return { ok: false, errors, warnings };
   }
-  if (rows[0]?.range > 5) warnings.push(`Перший рядок траєкторії починається з ${rows[0].range} м; бажано починати з 5 м.`);
+
+  const gaps = [];
+  for (let i = 1; i < rows.length; i++) {
+    const gap = rows[i].range - rows[i - 1].range;
+    if (!(gap > 0)) {
+      errors.push('Дистанції в таблиці мають зростати без повторів.');
+      break;
+    }
+    gaps.push(gap);
+  }
+
+  const maxRange = rows.at(-1)?.range;
+  if (!Number.isFinite(maxRange) || maxRange < 100) {
+    errors.push('Range Card має закінчуватися щонайменше на дистанції 100 м.');
+  }
+
+  if (rows[0]?.range > 5) {
+    warnings.push(`Перший рядок траєкторії починається з ${rows[0].range} м; рекомендовано починати з 5 м.`);
+  }
+
+  if (gaps.length) {
+    const sorted = [...gaps].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    const nominalStep = sorted.length % 2
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2;
+
+    if (Math.abs(nominalStep - 5) > 1e-9) {
+      if (nominalStep > 10) {
+        warnings.push(`Типовий крок Range Card — ${nominalStep} м. Додаток працюватиме, але для точнішого McCoy/Litz weighting рекомендовано крок 5 м.`);
+      } else {
+        warnings.push(`Типовий крок Range Card — ${nominalStep} м; рекомендовано використовувати крок 5 м.`);
+      }
+    }
+
+    const irregularGap = gaps.find(gap => gap > nominalStep * 1.5 + 1e-9);
+    if (irregularGap != null) {
+      const maxGap = Math.max(...gaps);
+      warnings.push(`У Range Card є нерівномірні прогалини між дистанціями (до ${maxGap} м). Перевір таблицю перед використанням.`);
+    }
+  }
 
   return { ok: errors.length === 0, errors, warnings };
 }
