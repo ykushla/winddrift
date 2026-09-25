@@ -32,10 +32,3 @@ npm test
 ## GitHub Pages
 
 Publish the `main` branch from `/ (root)` in **Settings → Pages**. The root `index.html` redirects to `./public/`.
-
-## v0.6.2 cache strategy
-
-GitHub Pages runtime assets are published under a physical versioned path:
-`public/assets/v0.6.2/`.
-
-This intentionally avoids query-string cache busting. Each release gets a new asset directory, so Safari receives new CSS/JavaScript URLs while HTML is requested with revalidation hints.
