@@ -92,18 +92,22 @@ export function windPointTemplate(point, targetDistance) {
 
   const positionControl = isPercent
     ? `
-      <div class="percent-control">
+      <div class="position-primary-line percent-primary-line">
         <div class="percent-value"><span class="percent-value-number">${formatNumber(Number(point.position), 0)}</span>%</div>
+        <div class="coordinate-companion">${formatNumber(distance, 0)} <span>м</span></div>
+      </div>
+      <div class="percent-control">
         <input class="position-slider" type="range" min="0" max="100" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція у відсотках">
         <div class="slider-scale"><span>0%</span><span>100%</span></div>
-      </div>
-      <div class="derived-position"><span class="derived-value">${formatNumber(distance, 0)} м</span></div>`
+      </div>`
     : `
-      <div class="position-row distance-entry-row">
-        <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція в метрах">
-        <span class="distance-unit">м</span>
-      </div>
-      <div class="derived-position"><span class="derived-value">${formatNumber(percent, 0)}%</span></div>`;
+      <div class="position-primary-line distance-primary-line">
+        <div class="position-row distance-entry-row">
+          <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція в метрах">
+          <span class="distance-unit">м</span>
+        </div>
+        <div class="coordinate-companion">${formatNumber(percent, 0)}%</div>
+      </div>`;
 
   return `
     <article class="wind-point" data-point-id="${point.id}">

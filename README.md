@@ -1,18 +1,14 @@
-# Wind Drift v0.6
+# Wind Drift v0.8
 
 Static, mobile-first wind-correction prototype designed for later deployment on GitHub Pages.
 
-## v0.6 changes
+## v0.8 changes
 
-- Ukrainian UI.
-- Shooter and target endpoints are fixed semantic points and no longer expose `%/m` selectors.
-- Endpoint positions are shown as plain distances with labels "Дистанція стрільця" and "Дистанція цілі".
-- Intermediate position controls are narrower so `%/м` selectors fit on small screens.
-- Wind direction dial supports tap **and drag** with 0.5-hour increments.
-- Minimal `+` button for adding wind points.
-- Numeric inputs trim redundant leading zeros while preserving values such as `0.5`.
-- Blue visual theme retained.
-- Static relative paths remain compatible with GitHub Pages.
+- Intermediate coordinates are shown side-by-side for faster field reading.
+- In `%` mode, the percentage and calculated distance in metres are both large and on the same line.
+- In `м` mode, the entered distance and calculated percentage are both large and on the same line.
+- Calculation logic is unchanged from v0.7.
+
 
 ## Run locally
 

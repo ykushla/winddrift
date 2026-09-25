@@ -291,3 +291,64 @@ h1 { margin: 4px 0 0; font-size: clamp(22px, 6vw, 30px); line-height: 1.05; over
   .locked-position-line .static-distance { font-size: 26px; }
   .percent-value { font-size: 21px; }
 }
+
+/* v0.8 — coordinate readability */
+.position-primary-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  margin-top: 2px;
+}
+.percent-primary-line {
+  justify-content: flex-start;
+  margin-bottom: 6px;
+}
+.distance-primary-line {
+  align-items: center;
+}
+.coordinate-companion {
+  flex: 0 0 auto;
+  font-size: clamp(24px, 6vw, 30px);
+  line-height: 1;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+}
+.coordinate-companion span {
+  font-size: .62em;
+  color: var(--muted);
+  font-weight: 800;
+}
+.percent-value {
+  font-size: clamp(28px, 7vw, 34px);
+  line-height: 1;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.percent-value-number {
+  font: inherit;
+}
+.distance-entry-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.position-input {
+  width: min(128px, 30vw);
+  flex: 0 1 128px;
+}
+.distance-unit {
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 800;
+}
+.derived-position {
+  display: none;
+}
+@media (max-width: 430px) {
+  .position-primary-line { gap: 9px; }
+  .coordinate-companion { font-size: 23px; }
+  .percent-value { font-size: 30px; }
+  .position-input { width: 108px; flex-basis: 108px; }
+}
