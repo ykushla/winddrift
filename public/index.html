@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111315">
+  <title>Wind Drift</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">WIND DRIFT</div>
+        <h1 id="profile-name">No profile loaded</h1>
+        <div id="profile-meta" class="profile-meta"></div>
+      </div>
+      <button id="import-button" class="button secondary">Import CSV</button>
+      <input id="csv-input" type="file" accept=".csv,text/csv" hidden>
+    </header>
+
+    <div id="import-message" class="message info">
+      Applied Ballistics export must have Spin Drift, Coriolis and other non-wind horizontal corrections disabled.
+    </div>
+
+    <section class="panel target-panel">
+      <label for="target-distance">TARGET DISTANCE</label>
+      <div class="target-input-wrap">
+        <input id="target-distance" class="target-input" type="number" inputmode="numeric" min="1" step="1">
+        <span>m</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <label>WIND MODEL</label>
+        <div id="interpolation" class="segmented">
+          <button type="button" data-model="linear" class="active">Linear</button>
+          <button type="button" data-model="pchip">PCHIP</button>
+        </div>
+      </div>
+
+      <div id="wind-points" class="wind-points"></div>
+      <button id="add-point" class="button add-point">+ Add wind point</button>
+    </section>
+
+    <section class="result-card" aria-live="polite">
+      <div class="result-label">CORRECTION</div>
+      <div class="result-main">
+        <span id="result-side" class="result-side">—</span>
+        <span id="result-value" class="result-value">—</span>
+      </div>
+      <div id="effective-wind" class="effective-wind">Import a profile to calculate</div>
+      <div id="result-details" class="result-details"></div>
+    </section>
+  </main>
+
+  <script type="module" src="../src/ui/app.js"></script>
+</body>
+</html>
