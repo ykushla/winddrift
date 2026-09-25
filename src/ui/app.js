@@ -38,12 +38,49 @@ const els = {
   clockDialog: $('#clock-dialog'),
   clockFace: $('#clock-face'),
   clockTitle: $('#clock-title'),
-  appVersion: $('#app-version')
+  appVersion: $('#app-version'),
+  navMenuButton: $('#nav-menu-button'),
+  navMenu: $('#nav-menu'),
+  navCurrentLabel: $('#nav-current-label')
 };
 
 
 if (els.appVersion) {
   els.appVersion.textContent = APP_VERSION;
+}
+
+
+const pageLabels = {
+  calculator: 'Вітрова поправка',
+  about: 'Як працює додаток',
+  reference: 'Довідник'
+};
+
+function closeNavMenu() {
+  if (!els.navMenu || !els.navMenuButton) return;
+  els.navMenu.hidden = true;
+  els.navMenuButton.setAttribute('aria-expanded', 'false');
+}
+
+function openNavMenu() {
+  if (!els.navMenu || !els.navMenuButton) return;
+  els.navMenu.hidden = false;
+  els.navMenuButton.setAttribute('aria-expanded', 'true');
+}
+
+function showPage(pageName) {
+  const safePage = pageLabels[pageName] ? pageName : 'calculator';
+  document.querySelectorAll('[data-page]').forEach(page => {
+    const active = page.dataset.page === safePage;
+    page.hidden = !active;
+    page.classList.toggle('active', active);
+  });
+  document.querySelectorAll('[data-page-target]').forEach(item => {
+    item.classList.toggle('active', item.dataset.pageTarget === safePage);
+  });
+  if (els.navCurrentLabel) els.navCurrentLabel.textContent = pageLabels[safePage];
+  closeNavMenu();
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 let editingClockPointId = null;
@@ -428,8 +465,25 @@ els.clockDialog.addEventListener('click', event => {
   if (event.target.closest('[data-clock-close]')) closeClock();
 });
 
+els.navMenuButton?.addEventListener('click', event => {
+  event.stopPropagation();
+  if (els.navMenu.hidden) openNavMenu();
+  else closeNavMenu();
+});
+
+els.navMenu?.addEventListener('click', event => {
+  const item = event.target.closest('[data-page-target]');
+  if (!item) return;
+  showPage(item.dataset.pageTarget);
+});
+
+document.addEventListener('click', event => {
+  if (!event.target.closest('.nav-dropdown')) closeNavMenu();
+});
+
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && !els.clockDialog.hidden) closeClock();
+  if (event.key === 'Escape') closeNavMenu();
 });
 
 els.targetDistance.min = MIN_TARGET_DISTANCE;

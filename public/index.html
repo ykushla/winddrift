@@ -9,6 +9,21 @@
 </head>
 <body>
   <main class="app-shell">
+    <nav class="app-nav" aria-label="Основна навігація">
+      <div class="nav-dropdown">
+        <button id="nav-menu-button" class="nav-menu-button" type="button" aria-haspopup="true" aria-expanded="false">
+          <span id="nav-current-label">Вітрова поправка</span>
+          <span class="nav-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div id="nav-menu" class="nav-menu" hidden>
+          <button type="button" class="nav-item active" data-page-target="calculator">Вітрова поправка</button>
+          <button type="button" class="nav-item" data-page-target="about">Як працює додаток</button>
+          <button type="button" class="nav-item" data-page-target="reference">Довідник</button>
+        </div>
+      </div>
+    </nav>
+
+    <section class="app-page active" data-page="calculator">
     <header class="topbar">
       <div class="profile-block">
         <div class="eyebrow brand-label"><span class="wind-icon" aria-hidden="true">≋</span><span>WIND DRIFT</span></div>
@@ -48,6 +63,54 @@
       </div>
       <div id="effective-wind" class="effective-wind">Імпортуй профіль для розрахунку</div>
       <div id="result-details" class="result-details"></div>
+    </section>
+
+    </section>
+
+    <section class="app-page info-page" data-page="about" hidden>
+      <article class="content-card">
+        <div class="eyebrow">ЯК ПРАЦЮЄ ДОДАТОК</div>
+        <h2>Вітрова поправка для нерівномірного вітру по траєкторії</h2>
+        <p>Wind Drift використовує балістичну таблицю, експортовану з Applied Ballistics, як еталон траєкторії. Додаток не намагається повторити повний балістичний solver: він бере готову чутливість кулі до бокового вітру з CSV і перераховує її для вітру, який ти задаєш у кількох точках по дистанції.</p>
+
+        <h3>Що відбувається під час розрахунку</h3>
+        <ol class="info-steps">
+          <li>CSV імпортується в профіль. Із двох вітрових рішень береться сильніший придатний вітер.</li>
+          <li>Його швидкість і напрям переводяться в поперечну складову, а Windage нормалізується до чутливості в mrad/(м/с).</li>
+          <li>Ти задаєш вітер у кількох точках між стрільцем і ціллю. Між точками використовується лінійна інтерполяція.</li>
+          <li>Вплив кожної ділянки траєкторії зважується за моделлю McCoy/Litz.</li>
+          <li>На виході додаток показує величину поправки в MIL і сторону L/R.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <div class="eyebrow">ПІДГОТОВКА CSV</div>
+        <h2>Як згенерувати таблицю в Applied Ballistics</h2>
+        <ol class="info-steps">
+          <li>В Applied Ballistics вибери потрібний профіль гвинтівки та боєприпасу.</li>
+          <li>Побудуй <strong>Range Card</strong> з потрібним максимальним діапазоном. Чим далі закінчується таблиця, тим більшу дистанцію цілі дозволить Wind Drift.</li>
+          <li>Задай вітер для таблиці. Напрям може бути лівим або правим; бажано використовувати виражену поперечну складову. Додаток сам врахує швидкість і напрям із CSV.</li>
+          <li>Якщо є два значення вітру, сильніше значення дає кращу точність після нормалізації через менший відносний вплив округлення.</li>
+          <li><strong>Вимкни Spin Drift, Coriolis та інші горизонтальні поправки, не пов’язані безпосередньо з вітром.</strong> Інакше вони потраплять у Windage і дадуть систематичну похибку.</li>
+          <li>Експортуй Range Card у CSV і імпортуй цей файл кнопкою <strong>«Імпорт CSV»</strong> на головному екрані.</li>
+        </ol>
+        <div class="message warning static-warning">CSV має містити чисту вітрову поправку. Spin Drift, Coriolis та інші незалежні горизонтальні ефекти повинні бути вимкнені перед експортом.</div>
+      </article>
+
+      <article class="content-card">
+        <div class="eyebrow">РОБОТА В ПОЛІ</div>
+        <h2>Як задавати точки вітру</h2>
+        <p>Початкова точка завжди відповідає позиції стрільця, кінцева — цілі. Проміжні точки можна розташовувати повзунком у відсотках або вводити їхню фактичну дистанцію в метрах. Обидва значення синхронізуються.</p>
+        <p>Для кожної точки задай швидкість вітру і напрям на циферблаті. Напрям можна вибрати тапом або вести пальцем по колу з кроком 0,5 години.</p>
+      </article>
+    </section>
+
+    <section class="app-page info-page" data-page="reference" hidden>
+      <article class="content-card placeholder-card">
+        <div class="eyebrow">ДОВІДНИК</div>
+        <h2>Розділ у розробці</h2>
+        <p>Тут буде окремий довідник по роботі з вітром, моделлю McCoy/Litz, напрямками, умовними позначеннями та практичними прикладами.</p>
+      </article>
     </section>
 
     <footer class="app-footer">
