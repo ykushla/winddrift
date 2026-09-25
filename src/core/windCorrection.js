@@ -1,5 +1,5 @@
-import { buildWindInterpolator } from './windInterpolation.js';
-import { interpolateTrajectoryValue, mcCoyLitzSegmentWeights } from './trajectory.js';
+import { buildWindInterpolator } from './windInterpolation.js?v=0.6.1';
+import { interpolateTrajectoryValue, mcCoyLitzSegmentWeights } from './trajectory.js?v=0.6.1';
 
 const EPS = 1e-12;
 

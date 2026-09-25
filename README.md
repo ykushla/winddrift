@@ -32,3 +32,8 @@ npm test
 ## GitHub Pages
 
 Publish the `main` branch from `/ (root)` in **Settings → Pages**. The root `index.html` redirects to `./public/`.
+
+
+## Cache policy (v0.6.1)
+
+GitHub Pages is static hosting, so this release uses versioned asset/module URLs (`?v=0.6.1`) for CSS and every ES module dependency. This prevents Safari from mixing files from different releases. The HTML also includes no-cache meta directives as an additional hint. Bump the version query whenever application files change.

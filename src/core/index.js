@@ -4,7 +4,7 @@ export {
   validateWindProfile,
   parseClockDirection,
   crosswindMagnitude
-} from './abCsvParser.js';
+} from './abCsvParser.js?v=0.6.1';
 
 export {
   clockToCorrectionComponent,
@@ -12,15 +12,15 @@ export {
   resolveWindPointX,
   normalizeWindPoints,
   buildWindInterpolator
-} from './windInterpolation.js';
+} from './windInterpolation.js?v=0.6.1';
 
 export {
   interpolateTrajectoryValue,
   buildTrajectoryToTarget,
   mcCoyLitzSegmentWeights
-} from './trajectory.js';
+} from './trajectory.js?v=0.6.1';
 
 export {
   calibrationSensitivityAtRange,
   calculateWindCorrection
-} from './windCorrection.js';
+} from './windCorrection.js?v=0.6.1';
