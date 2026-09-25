@@ -14,6 +14,7 @@ import {
   normalizeWindPointPositions,
   findLargestGapMidpoint,
   clampTargetDistance,
+  getProfileMaxRange,
   MIN_TARGET_DISTANCE
 } from './state.js';
 import { windPointTemplate, formatNumber, clockLabel, clockFaceTemplate, normalizeClock } from './components.js';
@@ -197,11 +198,10 @@ async function importCsv(file) {
   state.calibration = calibration;
   state.importWarnings = validation.warnings;
 
-  const maxRange = profile.trajectory.at(-1).range;
-  if (state.targetDistance > maxRange) {
-    state.targetDistance = Math.min(500, maxRange);
-    els.targetDistance.value = state.targetDistance;
-  }
+  const maxRange = getProfileMaxRange(profile);
+  els.targetDistance.max = Number.isFinite(maxRange) ? maxRange : '';
+  state.targetDistance = clampTargetDistance(state.targetDistance, maxRange);
+  els.targetDistance.value = formatNumber(state.targetDistance, 0);
 
   renderProfile();
   renderWindPoints();
@@ -234,7 +234,7 @@ els.targetDistance.addEventListener('input', event => {
   const requested = Number(event.target.value);
   if (!Number.isFinite(requested)) return;
 
-  const value = clampTargetDistance(requested);
+  const value = clampTargetDistance(requested, getProfileMaxRange(state.profile));
   if (value !== requested) event.target.value = formatNumber(value, 0);
 
   state.targetDistance = value;
@@ -244,7 +244,7 @@ els.targetDistance.addEventListener('input', event => {
 });
 
 els.targetDistance.addEventListener('change', event => {
-  const value = clampTargetDistance(event.target.value);
+  const value = clampTargetDistance(event.target.value, getProfileMaxRange(state.profile));
   state.targetDistance = value;
   event.target.value = formatNumber(value, 0);
   state.windPoints = normalizeWindPointPositions(state.windPoints, state.targetDistance);

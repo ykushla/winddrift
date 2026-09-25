@@ -6,7 +6,8 @@ import {
   setPointFromDistance,
   normalizeWindPointPositions,
   findLargestGapMidpoint,
-  clampTargetDistance
+  clampTargetDistance,
+  getProfileMaxRange
 } from '../src/ui/state.js';
 
 let p = { id: 'p', locked: false, positionMode: 'percent', position: 50 };
@@ -28,6 +29,10 @@ assert.equal(getPointCoordinates(p, 600).distance, 150);
 assert.equal(clampTargetDistance(50), 100);
 assert.equal(clampTargetDistance(100), 100);
 assert.equal(clampTargetDistance(650), 650);
+assert.equal(clampTargetDistance(1200, 995), 995);
+assert.equal(clampTargetDistance(800, 995), 800);
+assert.equal(getProfileMaxRange({ trajectory: [{ range: 5 }, { range: 995 }] }), 995);
+assert.equal(getProfileMaxRange(null), Infinity);
 
 const points = [
   { id: 'start', locked: true, positionMode: 'percent', position: 0 },

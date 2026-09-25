@@ -16,10 +16,21 @@ export const createInitialState = () => ({
   importWarnings: []
 });
 
-export function clampTargetDistance(value) {
+export function clampTargetDistance(value, maxDistance = Infinity) {
   const numeric = Number(value);
+  const maxNumeric = Number(maxDistance);
+  const safeMax = Number.isFinite(maxNumeric)
+    ? Math.max(MIN_TARGET_DISTANCE, maxNumeric)
+    : Infinity;
   if (!Number.isFinite(numeric)) return MIN_TARGET_DISTANCE;
-  return Math.max(MIN_TARGET_DISTANCE, numeric);
+  return Math.min(safeMax, Math.max(MIN_TARGET_DISTANCE, numeric));
+}
+
+export function getProfileMaxRange(profile) {
+  const rows = profile?.trajectory;
+  if (!Array.isArray(rows) || rows.length === 0) return Infinity;
+  const maxRange = Number(rows.at(-1)?.range);
+  return Number.isFinite(maxRange) ? maxRange : Infinity;
 }
 
 export function getPointCoordinates(point, targetDistance) {
