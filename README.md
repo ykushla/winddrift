@@ -1,4 +1,7 @@
-# Wind Drift v0.9
+# Wind Drift v0.9.1
+
+Patch release: footer version is now rendered from `src/version.js` instead of hard-coded HTML.
+
 
 Static, mobile-first wind-correction prototype designed for later deployment on GitHub Pages.
 

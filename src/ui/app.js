@@ -1,3 +1,4 @@
+import { APP_VERSION } from '../version.js';
 import {
   parseAppliedBallisticsCsv,
   chooseWindCalibration,
@@ -25,8 +26,14 @@ const els = {
   resultDetails: $('#result-details'),
   clockDialog: $('#clock-dialog'),
   clockFace: $('#clock-face'),
-  clockTitle: $('#clock-title')
+  clockTitle: $('#clock-title'),
+  appVersion: $('#app-version')
 };
+
+
+if (els.appVersion) {
+  els.appVersion.textContent = APP_VERSION;
+}
 
 let editingClockPointId = null;
 let clockDragging = false;
