@@ -11,16 +11,12 @@
   <main class="app-shell">
     <header class="topbar">
       <div class="profile-block">
-        <div class="eyebrow">WIND DRIFT</div>
+        <div class="eyebrow brand-label"><span class="wind-icon" aria-hidden="true">≋</span><span>WIND DRIFT</span></div>
         <h1 id="profile-name">Профіль не завантажено</h1>
         <div id="profile-meta" class="profile-meta"></div>
       </div>
 
       <div class="top-controls">
-        <div id="interpolation" class="segmented model-selector" aria-label="Модель інтерполяції вітру">
-          <button type="button" data-model="linear" class="active">Лінійна</button>
-          <button type="button" data-model="pchip">PCHIP</button>
-        </div>
         <button id="import-button" class="button secondary">Імпорт CSV</button>
       </div>
       <input id="csv-input" type="file" accept=".csv,text/csv" hidden>

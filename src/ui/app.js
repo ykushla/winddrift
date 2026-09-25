@@ -17,7 +17,6 @@ const els = {
   importButton: $('#import-button'),
   importMessage: $('#import-message'),
   targetDistance: $('#target-distance'),
-  interpolation: $('#interpolation'),
   windPoints: $('#wind-points'),
   addPoint: $('#add-point'),
   resultSide: $('#result-side'),
@@ -106,7 +105,7 @@ function recalculate() {
       calibration: state.calibration,
       targetDistance: state.targetDistance,
       windPoints: state.windPoints,
-      interpolation: state.interpolation
+      interpolation: 'linear'
     });
   } catch (error) {
     state.error = error.message;
@@ -216,14 +215,6 @@ els.targetDistance.addEventListener('input', event => {
   recalculate();
 });
 
-els.interpolation.addEventListener('click', event => {
-  const button = event.target.closest('button[data-model]');
-  if (!button) return;
-  state.interpolation = button.dataset.model;
-  [...els.interpolation.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b === button));
-  recalculate();
-});
-
 els.addPoint.addEventListener('click', () => {
   state.windPoints.splice(state.windPoints.length - 1, 0, {
     id: crypto.randomUUID(),
@@ -237,6 +228,18 @@ els.addPoint.addEventListener('click', () => {
   recalculate();
 });
 
+function updateDerivedPositionUi(point, card) {
+  const derived = card.querySelector('.derived-value');
+  if (point.positionMode === 'percent') {
+    const value = card.querySelector('.percent-value-number');
+    if (value) value.textContent = formatNumber(Number(point.position), 0);
+    if (derived) derived.textContent = `${formatNumber(state.targetDistance * Number(point.position) / 100, 0)} м`;
+  } else if (derived) {
+    const pct = state.targetDistance > 0 ? Number(point.position) / state.targetDistance * 100 : 0;
+    derived.textContent = `${formatNumber(pct, 0)}%`;
+  }
+}
+
 els.windPoints.addEventListener('input', event => {
   const card = event.target.closest('[data-point-id]');
   if (!card) return;
@@ -244,8 +247,17 @@ els.windPoints.addEventListener('input', event => {
   if (!point) return;
 
   if (event.target.matches('.position-input, .speed-input')) trimRedundantLeadingZeros(event.target);
-  if (event.target.matches('.position-input')) point.position = Number(event.target.value);
+
+  if (event.target.matches('.position-slider')) {
+    point.position = Number(event.target.value);
+    updateDerivedPositionUi(point, card);
+  }
+  if (event.target.matches('.position-input')) {
+    point.position = Number(event.target.value);
+    updateDerivedPositionUi(point, card);
+  }
   if (event.target.matches('.speed-input')) point.speed = Number(event.target.value);
+
   recalculate();
 });
 

@@ -39,11 +39,11 @@ export function crosswindMagnitude(speed, clock) {
 export function parseAppliedBallisticsCsv(text) {
   const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim() !== '');
   if (!lines.length || !lines[0].startsWith('Rangecard Export')) {
-    throw new Error('Not an Applied Ballistics Rangecard Export');
+    throw new Error('Це не файл Applied Ballistics Rangecard Export.');
   }
 
   const titleMatch = lines[0].match(/^Rangecard Export(?: \((.*)\))?$/);
-  const metadata = { title: titleMatch?.[1] || 'Applied Ballistics profile' };
+  const metadata = { title: titleMatch?.[1] || 'Профіль Applied Ballistics' };
   let headerIndex = -1;
 
   for (let i = 1; i < lines.length; i++) {
@@ -53,12 +53,12 @@ export function parseAppliedBallisticsCsv(text) {
     }
     Object.assign(metadata, pairsToObject(lines[i].split(',')));
   }
-  if (headerIndex < 0) throw new Error('Trajectory header not found');
+  if (headerIndex < 0) throw new Error('Не знайдено заголовок балістичної таблиці.');
 
   const headers = lines[headerIndex].split(',').map(s => s.trim());
   const required = ['Range [M]', 'Windage [MRAD]', 'Windage 2 [MRAD]', 'ToF [SEC]', 'Velocity [M/S]'];
   for (const h of required) {
-    if (!headers.includes(h)) throw new Error(`Required column missing: ${h}`);
+    if (!headers.includes(h)) throw new Error(`Відсутня обов’язкова колонка: ${h}`);
   }
 
   const idx = Object.fromEntries(headers.map((h, i) => [h, i]));
@@ -75,7 +75,7 @@ export function parseAppliedBallisticsCsv(text) {
     const windage2Signed = parseDirectional(c[idx['Windage 2 [MRAD]']], 'R', 'L');
 
     if (![velocity, tofCsv, windage1Signed, windage2Signed].every(Number.isFinite)) {
-      throw new Error(`Invalid numeric trajectory data at range ${range} m`);
+      throw new Error(`Некоректні числові дані траєкторії на дистанції ${range} м.`);
     }
 
     trajectory.push({
@@ -87,7 +87,7 @@ export function parseAppliedBallisticsCsv(text) {
     });
   }
 
-  if (trajectory.length < 2) throw new Error('Too few trajectory rows');
+  if (trajectory.length < 2) throw new Error('У таблиці замало рядків траєкторії.');
 
   const num = key => {
     const v = metadata[key];
@@ -124,7 +124,7 @@ export function parseAppliedBallisticsCsv(text) {
 export function chooseWindCalibration(profile, { minCrosswind = 1e-6 } = {}) {
   const m = profile?.metadata || {};
   if (!Number.isFinite(m.windClock)) {
-    throw new Error(`Unsupported or missing Wind Direction: ${m.windDirection ?? 'none'}`);
+    throw new Error(`Непідтримуваний або відсутній напрямок вітру: ${m.windDirection ?? 'немає'}.`);
   }
 
   const candidates = [
@@ -146,13 +146,13 @@ export function chooseWindCalibration(profile, { minCrosswind = 1e-6 } = {}) {
     }
   }
 
-  throw new Error('No usable crosswind in the AB Range Card. Export with wind having a lateral component.');
+  throw new Error('У Range Card немає придатної поперечної складової вітру. Експортуй таблицю з вітром, що має бокову складову.');
 }
 
 export function validateWindProfile(profile) {
   const errors = [];
   const warnings = [
-    'Generate the Applied Ballistics Range Card with Spin Drift, Coriolis and other non-wind horizontal corrections disabled.'
+    'Під час створення Range Card в Applied Ballistics вимкни Spin Drift, Coriolis та інші горизонтальні поправки, не пов’язані з вітром.'
   ];
 
   try {
@@ -163,9 +163,9 @@ export function validateWindProfile(profile) {
 
   const rows = profile?.trajectory || [];
   for (let i = 1; i < rows.length; i++) {
-    if (rows[i].range <= rows[i - 1].range) errors.push('Ranges are not strictly increasing');
+    if (rows[i].range <= rows[i - 1].range) errors.push('Дистанції в таблиці мають зростати без повторів.');
   }
-  if (rows[0]?.range > 5) warnings.push(`First trajectory row is ${rows[0].range} m; 5 m is preferred`);
+  if (rows[0]?.range > 5) warnings.push(`Перший рядок траєкторії починається з ${rows[0].range} м; бажано починати з 5 м.`);
 
   return { ok: errors.length === 0, errors, warnings };
 }

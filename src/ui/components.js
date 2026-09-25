@@ -59,14 +59,15 @@ export function windPointTemplate(point, targetDistance) {
   if (point.locked) {
     const isShooter = Number(point.position) === 0;
     const absoluteDistance = isShooter ? 0 : targetDistance;
-    const caption = isShooter ? 'Дистанція стрільця' : 'Дистанція цілі';
+    const caption = isShooter ? 'Позиція стрільця' : 'Дистанція цілі';
 
     return `
       <article class="wind-point locked-point" data-point-id="${point.id}">
         <div class="point-position static-position">
-          <label>ПОЗИЦІЯ</label>
-          <div class="static-distance">${formatNumber(absoluteDistance, 0)} <span>м</span></div>
-          <div class="position-caption">${caption}</div>
+          <div class="locked-position-line">
+            <div class="position-caption">${caption}</div>
+            <div class="static-distance">${formatNumber(absoluteDistance, 0)} <span>м</span></div>
+          </div>
         </div>
 
         <div class="point-wind">
@@ -86,22 +87,35 @@ export function windPointTemplate(point, targetDistance) {
   }
 
   const isPercent = point.positionMode === 'percent';
-  const derived = isPercent
-    ? `${formatNumber(targetDistance * Number(point.position) / 100, 0)} м`
-    : `${formatNumber(targetDistance > 0 ? Number(point.position) / targetDistance * 100 : 0, 0)}%`;
+  const distance = targetDistance * Number(point.position) / 100;
+  const percent = targetDistance > 0 ? Number(point.position) / targetDistance * 100 : 0;
+
+  const positionControl = isPercent
+    ? `
+      <div class="percent-control">
+        <div class="percent-value"><span class="percent-value-number">${formatNumber(Number(point.position), 0)}</span>%</div>
+        <input class="position-slider" type="range" min="0" max="100" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція у відсотках">
+        <div class="slider-scale"><span>0%</span><span>100%</span></div>
+      </div>
+      <div class="derived-position"><span class="derived-value">${formatNumber(distance, 0)} м</span></div>`
+    : `
+      <div class="position-row distance-entry-row">
+        <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}" aria-label="Позиція в метрах">
+        <span class="distance-unit">м</span>
+      </div>
+      <div class="derived-position"><span class="derived-value">${formatNumber(percent, 0)}%</span></div>`;
 
   return `
     <article class="wind-point" data-point-id="${point.id}">
       <div class="point-position">
-        <label>ПОЗИЦІЯ</label>
-        <div class="position-row">
-          <input class="field position-input" inputmode="decimal" type="number" min="0" step="1" value="${escapeHtml(point.position)}">
+        <div class="point-position-head">
+          <label>ПОЗИЦІЯ</label>
           <div class="segmented compact position-mode">
             <button type="button" data-mode="percent" class="${isPercent ? 'active' : ''}">%</button>
             <button type="button" data-mode="distance" class="${!isPercent ? 'active' : ''}">м</button>
           </div>
         </div>
-        <div class="derived-position">${derived}</div>
+        ${positionControl}
       </div>
 
       <div class="point-wind">
