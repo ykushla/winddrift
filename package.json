@@ -1,0 +1,10 @@
+{
+  "name": "wind-drift",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "test": "node tests/parser.test.mjs && node tests/calculator.test.mjs"
+  }
+}
