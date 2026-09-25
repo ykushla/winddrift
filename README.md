@@ -33,7 +33,9 @@ npm test
 
 Publish the `main` branch from `/ (root)` in **Settings → Pages**. The root `index.html` redirects to `./public/`.
 
+## v0.6.2 cache strategy
 
-## Cache policy (v0.6.1)
+GitHub Pages runtime assets are published under a physical versioned path:
+`public/assets/v0.6.2/`.
 
-GitHub Pages is static hosting, so this release uses versioned asset/module URLs (`?v=0.6.1`) for CSS and every ES module dependency. This prevents Safari from mixing files from different releases. The HTML also includes no-cache meta directives as an additional hint. Bump the version query whenever application files change.
+This intentionally avoids query-string cache busting. Each release gets a new asset directory, so Safari receives new CSS/JavaScript URLs while HTML is requested with revalidation hints.

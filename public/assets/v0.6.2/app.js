@@ -3,7 +3,7 @@ import {
   chooseWindCalibration,
   validateWindProfile,
   calculateWindCorrection
-} from '../core/index.js';
+} from './core/index.js';
 import { createInitialState, updatePointPositionMode } from './state.js';
 import { windPointTemplate, formatNumber, clockLabel, clockFaceTemplate, normalizeClock } from './components.js';
 
