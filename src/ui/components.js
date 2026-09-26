@@ -59,7 +59,7 @@ export function windPointTemplate(point, targetDistance, bounds = null) {
   if (point.locked) {
     const isShooter = Number(point.position) === 0;
     const absoluteDistance = isShooter ? 0 : targetDistance;
-    const caption = isShooter ? 'Дистанція стрільця' : 'Дистанція цілі';
+    const caption = isShooter ? 'Позиція стрільця' : 'Дистанція цілі';
 
     return `
       <article class="wind-point locked-point" data-point-id="${point.id}">

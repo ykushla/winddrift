@@ -924,12 +924,18 @@ html[data-theme="light"] .mirage-ground { fill: #c9b98f; }
 }
 
 
-/* v0.14.1 */
-.locked-distance-label {
+
+
+/* v0.14.2 — unified headings for shooter/intermediate/target distance blocks */
+.point-section-label,
+.point-position-head .field-label,
+.point-position-head label,
+.locked-position-line .field-label {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .04em;
   text-transform: uppercase;
+  line-height: 1.2;
 }
