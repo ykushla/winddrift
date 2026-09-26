@@ -922,3 +922,14 @@ html[data-theme="light"] .mirage-ground { fill: #c9b98f; }
   .mirage-speed { font-size: 12px; padding-inline: 8px; }
   .mirage-card p { font-size: 11px; padding-inline: 8px; }
 }
+
+
+/* v0.14.1 */
+.locked-distance-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}

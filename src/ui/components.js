@@ -59,7 +59,7 @@ export function windPointTemplate(point, targetDistance, bounds = null) {
   if (point.locked) {
     const isShooter = Number(point.position) === 0;
     const absoluteDistance = isShooter ? 0 : targetDistance;
-    const caption = isShooter ? 'Позиція стрільця' : 'Дистанція цілі';
+    const caption = isShooter ? 'Дистанція стрільця' : 'Дистанція цілі';
 
     return `
       <article class="wind-point locked-point" data-point-id="${point.id}">
@@ -102,16 +102,16 @@ export function windPointTemplate(point, targetDistance, bounds = null) {
   return `
     <article class="wind-point" data-point-id="${point.id}">
       <div class="point-position dual-position-control">
-        <label>ПОЗИЦІЯ</label>
+        <label>ДИСТАНЦІЯ</label>
         <div class="position-dual-head">
           <div class="percent-readout"><span class="percent-value-number">${formatNumber(percent, 1)}</span>%</div>
           <div class="distance-entry-row">
-            <input class="field position-input" inputmode="numeric" type="number" min="${escapeHtml(formatNumber(minDistance, 0))}" max="${escapeHtml(formatNumber(maxDistance, 0))}" step="1" value="${escapeHtml(formatNumber(distance, 0))}" aria-label="Позиція в метрах">
+            <input class="field position-input" inputmode="numeric" type="number" min="${escapeHtml(formatNumber(minDistance, 0))}" max="${escapeHtml(formatNumber(maxDistance, 0))}" step="1" value="${escapeHtml(formatNumber(distance, 0))}" aria-label="Дистанція в метрах">
             <span class="distance-unit">м</span>
           </div>
         </div>
         <div class="percent-control">
-          <input class="position-slider" type="range" min="${escapeHtml(minPercent)}" max="${escapeHtml(maxPercent)}" step="0.1" value="${escapeHtml(percent)}" aria-label="Позиція у відсотках">
+          <input class="position-slider" type="range" min="${escapeHtml(minPercent)}" max="${escapeHtml(maxPercent)}" step="0.1" value="${escapeHtml(percent)}" aria-label="Дистанція у відсотках">
           <div class="slider-scale"><span>${formatNumber(minPercent, 1)}%</span><span>${formatNumber(maxPercent, 1)}%</span></div>
         </div>
       </div>

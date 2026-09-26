@@ -278,10 +278,8 @@ async function importCsv(file) {
   renderWindPoints();
   recalculate();
 
-  const warningText = validation.warnings.length
-    ? ` Попередження: ${validation.warnings.join(' ')}`
-    : '';
-  setImportMessage(`Профіль «${profile.name}» імпортовано.${warningText}`, 'success');
+  els.importMessage.hidden = true;
+  els.importMessage.textContent = '';
 }
 
 els.importButton.addEventListener('click', () => els.importInput.click());
@@ -292,6 +290,7 @@ els.importInput.addEventListener('change', async event => {
   try {
     await importCsv(file);
   } catch (error) {
+    els.importMessage.hidden = false;
     setImportMessage(error.message, 'error');
   } finally {
     event.target.value = '';
